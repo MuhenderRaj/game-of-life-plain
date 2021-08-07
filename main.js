@@ -4,6 +4,8 @@ function init() {
     window.canvas = document.getElementById('game')
     window.ctx = canvas.getContext('2d')
     window.states = Array(100*100).fill(true, 0, window.numCols*window.numCols)
+    window.timeInt = document.getElementById("time-interval")
+
     //window.started = false
     window.pausedElem = document.getElementById("paused")
 
@@ -43,7 +45,7 @@ function draw() {
                     }
                 }
 
-                if(states[i*side+j] === true) {
+                if(states[i*window.numCols+j] === true) {
                     if(aliveNeighbors < 2) {
                         newStates.push(false)  // underpopulation
                     }
@@ -79,6 +81,8 @@ function draw() {
             ctx.fillRect(x*window.cellSize, y*window.cellSize, window.cellSize, window.cellSize)
         }
     }
+
+    setTimeout(draw, window.timeInt.value)
 }
 
 function getMousePosition(canvas, event) {
@@ -89,7 +93,7 @@ function getMousePosition(canvas, event) {
 }
 
 function cellIsAlive(states, x, y) {
-    let side = Math.sqrt(states.length)
+    let side = window.numCols
     if(x < 0 || x >= side || y < 0 || y >= side) {
         return false
     }

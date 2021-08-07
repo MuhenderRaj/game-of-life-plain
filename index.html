@@ -7,10 +7,12 @@
     <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <script src='main.js'></script>
 </head>
-<body onload="init();window.setInterval(draw, 1000);">
+<body onload="init();window.setTimeout(draw, 1000);">
     <div id="controls">
         <input type="checkbox" id="paused" checked />
         <label for="paused">Pause game</label>
+        <input type="range" id="time-interval" min="20" max="500" value="100" />
+        <label for="time-interval">time interval between ticks</label>
     </div>
     <canvas id="game" width="1000" height="1000">
         Canvas not supported in your browser... :(

@@ -8,6 +8,10 @@
     <script src='main.js'></script>
 </head>
 <body onload="init();window.setInterval(draw, 1000);">
+    <div id="controls">
+        <input type="checkbox" id="paused" checked />
+        <label for="paused">Pause game</label>
+    </div>
     <canvas id="game" width="1000" height="1000">
         Canvas not supported in your browser... :(
     </canvas>

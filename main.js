@@ -6,18 +6,55 @@ function init() {
     window.states = Array(100*100).fill(false, 0, window.numCols*window.numCols)
     window.speed = document.getElementById("speed")
     window.gridShown = document.getElementById("grid-show")
+    window.pausedElem = document.getElementById("paused")
+    window.rightSelectOn = false
+    window.selectCoords = {
+        startX: NaN,
+        startY: NaN,
+        endX: NaN,
+        endY: NaN
+    }
+    window.mousePos = {
+        x: NaN,
+        y: NaN
+    }
+
+    // window.canvas.oncontextmenu = e => {
+    //     e.preventDefault(); 
+    //     //e.stopPropagation(); 
+    // }
 
     //window.started = false
-    window.pausedElem = document.getElementById("paused")
 
-    window.canvas.addEventListener("click", (e) => {
-        var [x, y] = getMousePosition(window.canvas, e)
+    window.canvas.addEventListener("mousemove", e => {
+        var [x, y] = getMousePosition(e)
+        window.mousePos = {x: x, y: y}
+    })
 
-        // Flip relevant cell
+    window.canvas.addEventListener("click", e => {
+        var [x, y] = getMousePosition(e)
         var intX = Math.floor(x / window.cellSize)
         var intY = Math.floor(y / window.cellSize)
-        window.states[intX*window.numCols+intY] = !(window.states[intX*window.numCols+intY])
-        //window.started = true
+        if(!e.shiftKey) { // normal click
+            // Flip relevant cell
+            window.states[intX*window.numCols+intY] = !(window.states[intX*window.numCols+intY])
+            //window.started = true
+        }
+        else { // select click
+            if(!window.rightSelectOn) { // First endpoint of rect
+                window.rightSelectOn = true
+                // TODO Save mouse position
+                window.selectCoords.startX = x
+                window.selectCoords.startY = y
+                window.selectCoords.endX = NaN
+                window.selectCoords.endY = NaN
+            }
+            else { // Second endpoint of rect
+                window.selectCoords.endX = x
+                window.selectCoords.endY = y    // TODO reset start coords to NaN by pressing some button or something
+                window.rightSelectOn = false
+            }
+        }
     })
 }
 
@@ -86,11 +123,25 @@ function draw() {
         }
     }
 
+    if(! Number.isNaN(window.selectCoords.startX)) {
+        ctx.fillStyle = 'rgba(0, 125, 0, 0.2)'
+        if(Number.isNaN(window.selectCoords.endX)) {
+            let width = window.mousePos.x - window.selectCoords.startX
+            let height = window.mousePos.y - window.selectCoords.startY
+            ctx.fillRect(window.selectCoords.startX, window.selectCoords.startY, width, height)
+        }
+        else {
+            let width = window.selectCoords.endX - window.selectCoords.startX
+            let height = window.selectCoords.endY - window.selectCoords.startY
+            ctx.fillRect(window.selectCoords.startX, window.selectCoords.startY, width, height)
+        }
+    }
+
     setTimeout(draw, Math.floor(1000 / window.speed.value))
 }
 
-function getMousePosition(canvas, event) {
-    let rect = canvas.getBoundingClientRect()
+function getMousePosition(event) {
+    let rect = window.canvas.getBoundingClientRect()
     let x = event.clientX - rect.left
     let y = event.clientY - rect.top
     return [x, y]

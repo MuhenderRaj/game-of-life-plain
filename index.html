@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset='utf-8'>
+    <meta charset='utf-8' />
     <title>Game of Life</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css' />
+    <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <script src='main.js'></script>
 </head>
 <body onload="init();window.setTimeout(draw, 1000);">
@@ -13,9 +14,9 @@
     </div>
     <div id="controls">
         <input type="checkbox" id="paused" checked />
-        &nbsp;<label for="paused">Pause game</label>
+        <label for="paused">Pause game</label>
         <input type="checkbox" id="grid-show" checked />
-        &nbsp;<label for="grid-show">Show grid</label>
+        <label for="grid-show">Show grid</label>
         <input type="range" id="speed" min="1" max="100" value="50" />
         <label for="speed">speed of simulation</label>
         <button onclick="saveState();">Save Grid State</button>

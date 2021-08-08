@@ -104,3 +104,11 @@ function cellIsAlive(states, x, y) {
 
     return states[x*side+y]
 }
+
+function saveState() {
+    localStorage.setItem("state", JSON.stringify(window.states))
+}
+
+function loadState() {
+    window.states = JSON.parse(localStorage.getItem("state"))
+}

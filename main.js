@@ -3,8 +3,9 @@ function init() {
     window.cellSize = 10
     window.canvas = document.getElementById('game')
     window.ctx = canvas.getContext('2d')
-    window.states = Array(100*100).fill(true, 0, window.numCols*window.numCols)
-    window.timeInt = document.getElementById("time-interval")
+    window.states = Array(100*100).fill(false, 0, window.numCols*window.numCols)
+    window.speed = document.getElementById("speed")
+    window.gridShown = document.getElementById("grid-show")
 
     //window.started = false
     window.pausedElem = document.getElementById("paused")
@@ -23,8 +24,8 @@ function init() {
 function draw() {
 
     var ctx = window.ctx
-    ctx.fillStyle = 'rgb(0, 0, 0)'
-    //ctx.fillRect(10, 10, 50, 50)
+    ctx.fillStyle = 'rgb(255, 255, 255)'
+    ctx.fillRect(0, 0, 1000, 1000)
 
     if(!pausedElem.checked) {
         // Game of life logic
@@ -74,15 +75,18 @@ function draw() {
         for(let y = 0; y < window.numCols; y++) {
             if(window.states[x*window.numCols+y]) {
                 ctx.fillStyle = 'rgb(0, 0, 0)'
+                ctx.fillRect(x*window.cellSize, y*window.cellSize, window.cellSize, window.cellSize)
             }
-            else {
-                ctx.fillStyle = 'rgb(255, 255, 255)'
+            else if (window.gridShown.checked) {
+                //ctx.fillStyle = 'rgb(255, 255, 255)'
+                ctx.strokeStyle = 'rgb(180, 180, 180)'
+                ctx.lineWidth = 0.5
+                ctx.strokeRect(x*window.cellSize, y*window.cellSize, window.cellSize, window.cellSize)
             }
-            ctx.fillRect(x*window.cellSize, y*window.cellSize, window.cellSize, window.cellSize)
         }
     }
 
-    setTimeout(draw, window.timeInt.value)
+    setTimeout(draw, Math.floor(1000 / window.speed.value))
 }
 
 function getMousePosition(canvas, event) {

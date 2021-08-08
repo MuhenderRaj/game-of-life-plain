@@ -2,17 +2,22 @@
 <html>
 <head>
     <meta charset='utf-8'>
-    <title>Page Title</title>
+    <title>Game of Life</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <script src='main.js'></script>
 </head>
 <body onload="init();window.setTimeout(draw, 1000);">
+    <div id="heading">
+        Conway's Game of Life
+    </div>
     <div id="controls">
         <input type="checkbox" id="paused" checked />
-        <label for="paused">Pause game</label>
-        <input type="range" id="time-interval" min="20" max="500" value="100" />
-        <label for="time-interval">time interval between ticks</label>
+        &nbsp;<label for="paused">Pause game</label>
+        <input type="checkbox" id="grid-show" checked />
+        &nbsp;<label for="grid-show">Show grid</label>
+        <input type="range" id="speed" min="1" max="100" value="50" />
+        <label for="speed">speed of simulation</label>
     </div>
     <canvas id="game" width="1000" height="1000">
         Canvas not supported in your browser... :(

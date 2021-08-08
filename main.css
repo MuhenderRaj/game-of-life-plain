@@ -1,3 +1,19 @@
+body {
+    margin: 0;
+    padding: 0 auto;
+    text-align: center;
+}
+
+#heading {
+    margin: 10px auto;
+    font-size: 36px;
+}
+
 #game {
     width: 1000px;
+}
+
+#controls {
+    margin: 10px auto;
+
 }

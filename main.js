@@ -105,7 +105,7 @@ function update() {
 }
 
 function copySelection() {
-    
+
 }
 
 function replaceWithSelection(posX, posY) {
@@ -174,9 +174,22 @@ function cellIsAlive(states, x, y) {
 }
 
 function saveState() {
-    localStorage.setItem("state", JSON.stringify(window.states))
+    let liveCells = []
+    for(let i = 0; i < window.numCols * window.numCols; i++) {
+        if(window.states[i]) {
+            liveCells.append(i)
+        }
+    }
+
+    localStorage.setItem("state", JSON.stringify(liveCells))
 }
 
 function loadState() {
-    window.states = JSON.parse(localStorage.getItem("state"))
+    let liveCells = JSON.parse(localStorage.getItem("state"))
+
+    window.states = Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
+
+    for(let i of liveCells) {
+        window.states[i] = true
+    }
 }

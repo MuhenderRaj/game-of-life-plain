@@ -58,13 +58,8 @@ function init() {
     })
 }
 
-function draw() {
-
-    var ctx = window.ctx
-    ctx.fillStyle = 'rgb(255, 255, 255)'
-    ctx.fillRect(0, 0, 1000, 1000)
-
-    if(!pausedElem.checked) {
+function update() {
+    if(!window.pausedElem.checked) {
         // Game of life logic
         var newStates = []
         
@@ -107,7 +102,27 @@ function draw() {
 
         window.states = newStates
     }
+}
+
+function copySelection() {
     
+}
+
+function replaceWithSelection(posX, posY) {
+
+}
+
+function draw() {
+
+    // Draw background
+    var ctx = window.ctx
+    ctx.fillStyle = 'rgb(255, 255, 255)'
+    ctx.fillRect(0, 0, 1000, 1000)
+
+    // Apply game rules
+    update()
+    
+    // Draw the grid
     for(let x = 0; x < window.numCols; x++) {
         for(let y = 0; y < window.numCols; y++) {
             if(window.states[x*window.numCols+y]) {
@@ -123,6 +138,7 @@ function draw() {
         }
     }
 
+    // Draw the selection box
     if(! Number.isNaN(window.selectCoords.startX)) {
         ctx.fillStyle = 'rgba(0, 125, 0, 0.2)'
         if(Number.isNaN(window.selectCoords.endX)) {
@@ -137,6 +153,7 @@ function draw() {
         }
     }
 
+    // Call next iteration with a time gap
     setTimeout(draw, Math.floor(1000 / window.speed.value))
 }
 

@@ -3,7 +3,7 @@ function init() {
     window.cellSize = 10
     window.canvas = document.getElementById('game')
     window.ctx = canvas.getContext('2d')
-    window.states = Array(100*100).fill(false, 0, window.numCols*window.numCols)
+    window.states = new Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
     window.speed = document.getElementById("speed")
     window.gridShown = document.getElementById("grid-show")
     window.pausedElem = document.getElementById("paused")
@@ -43,7 +43,6 @@ function init() {
         else { // select click
             if(!window.rightSelectOn) { // First endpoint of rect
                 window.rightSelectOn = true
-                // TODO Save mouse position
                 window.selectCoords.startX = x
                 window.selectCoords.startY = y
                 window.selectCoords.endX = NaN
@@ -177,7 +176,7 @@ function saveState() {
     let liveCells = []
     for(let i = 0; i < window.numCols * window.numCols; i++) {
         if(window.states[i]) {
-            liveCells.append(i)
+            liveCells.push(i)
         }
     }
 
@@ -187,7 +186,7 @@ function saveState() {
 function loadState() {
     let liveCells = JSON.parse(localStorage.getItem("state"))
 
-    window.states = Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
+    window.states = new Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
 
     for(let i of liveCells) {
         window.states[i] = true

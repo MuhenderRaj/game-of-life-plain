@@ -14,6 +14,12 @@ function init() {
         endX: NaN,
         endY: NaN
     }
+    window.copiedCoords = {
+        startX: NaN,
+        startY: NaN,
+        endX: NaN,
+        endY: NaN
+    }
     window.mousePos = {
         x: NaN,
         y: NaN
@@ -55,6 +61,8 @@ function init() {
             }
         }
     })
+
+    draw();
 }
 
 function update() {
@@ -104,11 +112,22 @@ function update() {
 }
 
 function copySelection() {
+    // TODO write implementation
+    throw "Not implemented"
+    // Note: have to copy entire selection to a variable like an object with an array and dimensions or something, because copy and paste regions may overlap
 
+    // for(let i in window.selectCoords) { // TODO test if this works
+    //     if(Number.isNaN(window.selectCoords[i])) {
+    //         return
+    //     }
+    // }
+
+    // window.copiedCoords = Object.assign({}, window.selectCoords)
 }
 
 function replaceWithSelection(posX, posY) {
-
+    // TODO write implementation
+    throw "Not implemented"
 }
 
 function draw() {
@@ -172,6 +191,10 @@ function cellIsAlive(states, x, y) {
     return states[x*side+y]
 }
 
+function clearGrid() {
+    window.states = new Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
+}
+
 function saveState() {
     let liveCells = []
     for(let i = 0; i < window.numCols * window.numCols; i++) {
@@ -186,7 +209,7 @@ function saveState() {
 function loadState() {
     let liveCells = JSON.parse(localStorage.getItem("state"))
 
-    window.states = new Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
+    clearGrid()
 
     for(let i of liveCells) {
         window.states[i] = true

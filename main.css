@@ -17,3 +17,11 @@ body {
     margin: 10px auto;
 
 }
+
+#rules {
+    margin: 10px auto;
+}
+
+ol {
+    list-style-position: inside;
+}

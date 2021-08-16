@@ -9,7 +9,7 @@
     <script src='main.js'></script>
     <script src='styling.js'></script>
 </head>
-<body onload="init();draw();">
+<body onload="init();">
     <div id="heading">
         Conway's Game of Life
     </div>
@@ -28,12 +28,20 @@
     <div id="controls">
         <input type="checkbox" id="paused" checked />
         <label for="paused">Pause game</label>
+        
         <input type="checkbox" id="grid-show" checked />
         <label for="grid-show">Show grid</label>
+        
         <input type="range" id="speed" min="1" max="100" value="50" />
         <label for="speed">speed of simulation</label>
+        
         <button onclick="saveState();">Save Grid State</button>
+        
         <button onclick="loadState();">Load Grid State</button>
+
+        <button onclick="copySelection();">Copy Selection</button>
+        
+        <button onclick="replaceWithSelection();">ReplaceWithSelection</button>
     </div>
 
     <canvas id="game" width="1000" height="1000">

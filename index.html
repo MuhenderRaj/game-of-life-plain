@@ -23,6 +23,11 @@
             <li>If a cell is dead, it becomes alive by reproduction if there are exactly 3 alive neighbors around it</li>
         </ol>
         Here, "neighbors" refers to the cells adjacent to the given cell horizontally, vertically, or diagonally.
+
+        Shift-click to start selecting cells. Shift-click again to confirm selected cells.
+        Click Copy Selection to copy the selected cells. 
+        Alt-click to designate location to paste copied cells.
+        Click Replace With Selection to paste the selected cells at this location.
     </div>
 
     <div id="controls">
@@ -41,7 +46,8 @@
 
         <button onclick="copySelection();">Copy Selection</button>
         
-        <button onclick="replaceWithSelection();">ReplaceWithSelection</button>
+        <button onclick="replaceWithSelection();">Replace With Selection</button>
+        <button onclick="window.copiedArea = rotateShape();">Rotate Selection</button>
     </div>
 
     <canvas id="game" width="1000" height="1000">

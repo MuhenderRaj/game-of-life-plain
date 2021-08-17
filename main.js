@@ -1,5 +1,10 @@
+///////////////////////////
+/// Lifecycle functions ///
+///////////////////////////
 
-
+/**
+ * Run once at the start of the program
+ */
 function init() {
     // Global constants //
     window.numCols = 100
@@ -100,11 +105,24 @@ function init() {
             //window.started = true
         }
     })
+
+    window.canvas.addEventListener('keydown', function(event) {
+        if(event.ctrlKey && event.key === 'c') {
+            copySelection()
+            console.log('works')
+        }
+        else if(event.ctrlKey && event.key === 'v') {
+            replaceWithSelection()
+        }
+    });
     
     clearGrid()
     draw()
 }
 
+/**
+ * The main update method of the program
+ */
 function update() {
     // If not paused
     if(!window.pausedElem.checked) {
@@ -151,38 +169,16 @@ function update() {
     }
 }
 
-function copySelection() {
-    window.copiedArea.width = Math.abs(window.selectCells.startX - window.selectCells.endX)
-    window.copiedArea.height = Math.abs(window.selectCells.startY - window.selectCells.endY)
-
-    let startX = Math.min(window.selectCells.startX, window.selectCells.endX)
-    let startY = Math.min(window.selectCells.startY, window.selectCells.endY)
-
-    window.copiedArea.aliveCells = []
-    for(let i = 0; i < window.copiedArea.width; i++) {
-        for(let j = 0; j < window.copiedArea.height; j++) {
-            if(window.states[(startX+i) * window.numCols + (startY+j)]) {
-                window.copiedArea.aliveCells.push(i * window.copiedArea.height + j)
-            }
-        }
-    }
-}
-
-function replaceWithSelection() {
-    for(let cell of window.copiedArea.aliveCells) {
-        var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
-        var yInd = window.pasteCell.posY + cell % window.copiedArea.height
-        window.states[xInd*window.numCols + yInd] = true
-    }
-}
-
+/**
+ * Draw changes to the canvas periodically. Calls itself after a timeout
+ */
 function draw() {
-
+    
     // Draw background
     var ctx = window.ctx   // Convenience
     ctx.fillStyle = 'rgb(255, 255, 255)'
     ctx.fillRect(0, 0, 1000, 1000)
-
+    
     // Apply game rules
     update()
     
@@ -201,7 +197,7 @@ function draw() {
             }
         }
     }
-
+    
     // Draw the selection box
     if(! Number.isNaN(window.selectCells.startX)) {
         ctx.fillStyle = 'rgba(0, 125, 0, 0.2)'
@@ -216,22 +212,31 @@ function draw() {
             ctx.fillRect(window.selectCells.startX * window.cellSize, window.selectCells.startY * window.cellSize, width, height)
         }
     }
-
+    
     // Grey-shade the box the mouse is on
     ctx.fillStyle = 'rgb(150, 150, 150)'
     ctx.fillRect(window.mouseCell.x * window.cellSize, window.mouseCell.y * window.cellSize, window.cellSize, window.cellSize)
-
+    
     // Red-shade the box marked to be the paste location
     if(! Number.isNaN(window.pasteCell.posX)) {
         ctx.fillStyle = 'rgb(255, 0, 0)'
         ctx.fillRect(window.pasteCell.posX * window.cellSize, window.pasteCell.posY * window.cellSize, window.cellSize, window.cellSize)
     }
     
-
+    
     // Call next iteration with a time gap
     setTimeout(draw, Math.floor(1000 / window.speed.value))
 }
 
+/////////////////////////
+/// Utility functions ///
+/////////////////////////
+
+/**
+ * 
+ * @param {Event} event 
+ * @returns the coordinates of the mouse
+ */
 function getmousePosition(event) {
     let rect = window.canvas.getBoundingClientRect()
     let x = event.clientX - rect.left
@@ -239,28 +244,77 @@ function getmousePosition(event) {
     return [x, y]
 }
 
+/**
+ * 
+ * @param {Event} event 
+ * @returns the cell the mouse is currently in
+ */
 function getMouseCell(event) {
     let [x, y] = getmousePosition(event)
-
+    
     var intX = Math.floor(x / window.cellSize)
     var intY = Math.floor(y / window.cellSize)
-
+    
     return [intX, intY]
 }
 
+/**
+ * 
+ * @param {boolean[]} states the array of cells to search in
+ * @param {number} x the x value of the cell
+ * @param {number} y the y value of the cell
+ * @returns {boolean} whether the cell is alive and valid
+ */
 function cellIsAlive(states, x, y) {
     let side = window.numCols
     if(x < 0 || x >= side || y < 0 || y >= side) {
         return false
     }
-
+    
     return states[x*side+y]
 }
 
+/**
+ * Clears the grid, killing all the cells
+ */
 function clearGrid() {
     window.states = new Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
 }
 
+/**
+ * Copies the selected cells to the copiedArea variable
+ */
+function copySelection() {
+    window.copiedArea.width = Math.abs(window.selectCells.startX - window.selectCells.endX)
+    window.copiedArea.height = Math.abs(window.selectCells.startY - window.selectCells.endY)
+
+    let startX = Math.min(window.selectCells.startX, window.selectCells.endX)
+    let startY = Math.min(window.selectCells.startY, window.selectCells.endY)
+
+    window.copiedArea.aliveCells = []
+    for(let i = 0; i < window.copiedArea.width; i++) {
+        for(let j = 0; j < window.copiedArea.height; j++) {
+            if(window.states[(startX+i) * window.numCols + (startY+j)]) {
+                window.copiedArea.aliveCells.push(i * window.copiedArea.height + j)
+            }
+        }
+    }
+}
+
+/**
+ * Replaces the cells starting at the alt-clicked cell with thw cells in copiedArea
+ */
+function replaceWithSelection() {
+    for(let cell of window.copiedArea.aliveCells) {
+        var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
+        var yInd = window.pasteCell.posY + cell % window.copiedArea.height
+        window.states[xInd*window.numCols + yInd] = true
+    }
+}
+
+/**
+ * Saves the current grid to localStorage
+ */
 function saveState() {
     let liveCells = []
     for(let i = 0; i < window.numCols * window.numCols; i++) {
@@ -272,6 +326,9 @@ function saveState() {
     localStorage.setItem("state", JSON.stringify(liveCells))
 }
 
+/**
+ * Loads the saved localStorage list ot the grid
+ */
 function loadState() {
     let liveCells = JSON.parse(localStorage.getItem("state"))
 

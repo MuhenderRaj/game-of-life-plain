@@ -22,12 +22,13 @@
             <li>If a cell is alive, it dies due to overpopulation if there are more than 3 alive neighbors around it</li>
             <li>If a cell is dead, it becomes alive by reproduction if there are exactly 3 alive neighbors around it</li>
         </ol>
-        Here, "neighbors" refers to the cells adjacent to the given cell horizontally, vertically, or diagonally.
+        Here, "neighbors" refers to the cells adjacent to the given cell horizontally, vertically, or diagonally.<br />
 
-        Shift-click to start selecting cells. Shift-click again to confirm selected cells.
-        Click Copy Selection to copy the selected cells. 
-        Alt-click to designate location to paste copied cells.
-        Click Replace With Selection to paste the selected cells at this location.
+        Shift-leftclick to start selecting cells.<br />
+        Shift-leftclick again to confirm selected cells.<br />
+        Ctrl-c to copy the selected cells.<br />
+        Alt-leftclick to designate location to paste copied cells.<br />
+        Ctrl-v to paste the selected cells at this location.
     </div>
 
     <div id="controls">
@@ -44,13 +45,15 @@
         
         <button onclick="loadState();">Load Grid State</button>
 
-        <button onclick="copySelection();">Copy Selection</button>
-        
-        <button onclick="replaceWithSelection();">Replace With Selection</button>
+        <!--replaced with C-c and C-v-->
+        <!--
+            <button onclick="copySelection();">Copy Selection</button>
+            <button onclick="replaceWithSelection();">Replace With Selection</button>
+        -->
         <button onclick="window.copiedArea = rotateShape();">Rotate Selection</button>
     </div>
 
-    <canvas id="game" width="1000" height="1000">
+    <canvas id="game" width="1000" height="1000" tabindex='1'>
         Canvas not supported in your browser... :(
     </canvas>
 </body>

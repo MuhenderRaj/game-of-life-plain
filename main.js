@@ -1,3 +1,5 @@
+import {presets} from './modules/presets.js';
+
 ///////////////////////////
 /// Lifecycle functions ///
 ///////////////////////////
@@ -5,7 +7,7 @@
 /**
  * Run once at the start of the program
  */
-function init() {
+export function init() {
     // Global constants //
     window.numCols = 100
     window.cellSize = 10
@@ -50,23 +52,7 @@ function init() {
     }
 
     // Default game of life presets to copy //
-    window.presets = {
-        GosperGun_SouthEast: {
-            aliveCells: (36)[4, 5, 13, 14, 94, 95, 96, 102, 106, 110, 116, 119, 125, 131, 138, 142, 148, 149, 150, 158, 182, 183, 184, 191, 192, 193, 199, 203, 216, 217, 221, 222, 308, 309, 317, 318],
-            height: 9,
-            width: 36,
-        },
-        Glider_SouthEast: {
-            aliveCells: (5)[1, 5, 6, 7, 8],
-            height: 3,
-            width: 3,
-        },
-        Eater_NorthWest: {
-            aliveCells: (7)[0, 1, 4, 9, 10, 11, 15],
-            height: 4,
-            width: 4,
-        }
-    }
+    window.presets = presets
     
     // Mouse event listeners //
     window.canvas.addEventListener("mousemove", e => {
@@ -109,7 +95,6 @@ function init() {
     window.canvas.addEventListener('keydown', function(event) {
         if(event.ctrlKey && event.key === 'c') {
             copySelection()
-            console.log('works')
         }
         else if(event.ctrlKey && event.key === 'v') {
             replaceWithSelection()
@@ -173,7 +158,8 @@ function update() {
  * Draw changes to the canvas periodically. Calls itself after a timeout
  */
 function draw() {
-    
+    var el = document.createElement("div")
+    el.setAttribute("class", "")
     // Draw background
     var ctx = window.ctx   // Convenience
     ctx.fillStyle = 'rgb(255, 255, 255)'
@@ -218,11 +204,15 @@ function draw() {
     ctx.fillRect(window.mouseCell.x * window.cellSize, window.mouseCell.y * window.cellSize, window.cellSize, window.cellSize)
     
     // Red-shade the box marked to be the paste location
-    if(! Number.isNaN(window.pasteCell.posX)) {
-        ctx.fillStyle = 'rgb(255, 0, 0)'
-        ctx.fillRect(window.pasteCell.posX * window.cellSize, window.pasteCell.posY * window.cellSize, window.cellSize, window.cellSize)
+    if(! Number.isNaN(window.pasteCell.posX) && window.copiedArea.aliveCells.length !== 0) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
+        //ctx.fillRect(window.pasteCell.posX * window.cellSize, window.pasteCell.posY * window.cellSize, window.cellSize, window.cellSize)
+        for(let cell of window.copiedArea.aliveCells) {
+            var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
+            var yInd = window.pasteCell.posY + cell % window.copiedArea.height
+            ctx.fillRect(xInd*window.cellSize, yInd*window.cellSize, window.cellSize, window.cellSize)
+        }
     }
-    
     
     // Call next iteration with a time gap
     setTimeout(draw, Math.floor(1000 / window.speed.value))

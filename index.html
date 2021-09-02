@@ -6,7 +6,10 @@
     <meta name='viewport' content='width=device-width, initial-scale=1' />
     <link rel='stylesheet' type='text/css' media='screen' href='main.css' />
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
-    <script src='main.js'></script>
+    <script type="module">
+        import {init} from './main.js'
+        window.init = init
+    </script>
     <script src='styling.js'></script>
 </head>
 <body onload="init();">

@@ -8,7 +8,22 @@
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <script type="module">
         import {init} from './main.js'
+        import {presets} from './modules/presets.js'
+
         window.init = init
+
+        let presetsContainer = document.getElementById("presets")
+        let option = document.createElement("option")
+        option.setAttribute("value", "none")
+        option.setAttribute("selected", "selected")
+        option.innerText = "none"
+        presetsContainer.appendChild(option)
+        for(let preset in presets) {
+            let option = document.createElement("option")
+            option.setAttribute("value", preset)
+            option.innerText = preset  // Ideally the name of the preset
+            presetsContainer.appendChild(option)
+        }
     </script>
     <script src='styling.js'></script>
 </head>
@@ -54,6 +69,8 @@
             <button onclick="replaceWithSelection();">Replace With Selection</button>
         -->
         <button onclick="window.copiedArea = rotateShape();">Rotate Selection</button>
+
+        <select id="presets"></select>
     </div>
 
     <canvas id="game" width="1000" height="1000" tabindex='1'>

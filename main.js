@@ -18,6 +18,7 @@ export function init() {
     window.speed = document.getElementById("speed")
     window.gridShown = document.getElementById("grid-show")
     window.pausedElem = document.getElementById("paused")
+    window.selectPreset = document.getElementById("presets")
     
     // Related to selecting cells //
     window.isSelecting = false
@@ -109,6 +110,10 @@ export function init() {
  * The main update method of the program
  */
 function update() {
+    if(window.selectPreset.selectedIndex !== 0) {
+        window.copiedArea = window.presets[window.selectPreset.options[window.selectPreset.selectedIndex].value]
+    }
+    
     // If not paused
     if(!window.pausedElem.checked) {
         // Game of life logic
@@ -305,7 +310,7 @@ function replaceWithSelection() {
 /**
  * Saves the current grid to localStorage
  */
-function saveState() {
+export function saveState() {
     let liveCells = []
     for(let i = 0; i < window.numCols * window.numCols; i++) {
         if(window.states[i]) {
@@ -319,7 +324,7 @@ function saveState() {
 /**
  * Loads the saved localStorage list ot the grid
  */
-function loadState() {
+export function loadState() {
     let liveCells = JSON.parse(localStorage.getItem("state"))
 
     clearGrid()
@@ -334,7 +339,7 @@ function loadState() {
  * @param {{aliveCells: number[], height: number, width: number}} [shape=window.copiedArea] the shape to be rotated. By default the copied shape
  * @returns {{aliveCells: number[], height: number, width: number}} the anticlockwise rotated shape
  */
-function rotateShape(shape) {
+export function rotateShape(shape) {
     //GosperGun_SouthEast: {
     //    aliveCells: (36)[4, 5, 13, 14, 94, 95, 96, 102, 106, 110, 116, 119, 125, 131, 138, 142, 148, 149, 150, 158, 182, 183, 184, 191, 192, 193, 199, 203, 216, 217, 221, 222, 308, 309, 317, 318],
     //    height: 9,

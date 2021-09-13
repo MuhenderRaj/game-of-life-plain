@@ -7,10 +7,13 @@
     <link rel='stylesheet' type='text/css' media='screen' href='main.css' />
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <script type="module">
-        import {init} from './main.js'
+        import {init, saveState, loadState, rotateShape} from './main.js'
         import {presets} from './modules/presets.js'
 
         window.init = init
+        window.saveState = saveState
+        window.loadState = loadState
+        window.rotateShape = rotateShape
 
         let presetsContainer = document.getElementById("presets")
         let option = document.createElement("option")
@@ -68,7 +71,7 @@
             <button onclick="copySelection();">Copy Selection</button>
             <button onclick="replaceWithSelection();">Replace With Selection</button>
         -->
-        <button onclick="window.copiedArea = rotateShape();">Rotate Selection</button>
+        <button onclick="window.copiedArea = rotateShape();alert('rotated')">Rotate Selection</button>
 
         <select id="presets"></select>
     </div>

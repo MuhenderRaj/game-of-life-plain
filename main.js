@@ -55,6 +55,18 @@ export function init() {
     // Default game of life presets to copy //
     window.presets = presets
     
+    // The cells that changed in the last iteration. //
+    // Update only these and surrounding cells       //
+    function* naturalNumbers(n) {
+        var curr = 0
+
+        while(curr < n) {
+            yield curr
+            curr++
+        }
+    }
+    window.changedCells = new Set(naturalNumbers(window.numCols * window.numCols))
+
     // Mouse event listeners //
     window.canvas.addEventListener("mousemove", e => {
         var [x, y] = getmousePosition(e)
@@ -110,7 +122,7 @@ export function init() {
  * The main update method of the program
  */
 function update() {
-    if(window.selectPreset.selectedIndex !== 0) {
+    if(window.selectPreset.selectedIndex !== 0) { // Note: Kinda hacky. Can rotate copied shape only if dropdown select is made none
         window.copiedArea = window.presets[window.selectPreset.options[window.selectPreset.selectedIndex].value]
     }
     
@@ -118,41 +130,42 @@ function update() {
     if(!window.pausedElem.checked) {
         // Game of life logic
         var newStates = []
-        for(let i = 0; i < window.numCols; i++) {
-            for(let j = 0; j < window.numCols; j++) {
-                let aliveNeighbors = 0
-                for(let x = -1; x <= 1; x++) {
-                    for(let y = -1; y <= 1; y++) {
-                        if(x === 0 && y === 0) {
-                            continue
-                        }
-                        
-                        if(cellIsAlive(window.states, i+x, j+y)) {
-                            aliveNeighbors++
-                        }
+        for(let cell of window.changedCells)
+            let i = Math.floor(cell / window.numCols)
+            let j = cell % window.numCols 
+            let aliveNeighbors = 0
+            for(let x = -1; x <= 1; x++) {
+                for(let y = -1; y <= 1; y++) {
+                    if(x === 0 && y === 0) {
+                        continue
                     }
-                }
-
-                if(states[i*window.numCols+j] === true) {
-                    if(aliveNeighbors < 2) {
-                        newStates.push(false)  // underpopulation
-                    }
-                    else if(aliveNeighbors < 4) {
-                        newStates.push(true)
-                    }
-                    else {
-                        newStates.push(false)  // overpopulation
-                    }
-                }
-                else {
-                    if (aliveNeighbors === 3) {
-                        newStates.push(true)   // reproduction
-                    }
-                    else {
-                        newStates.push(false)
+                    
+                    if(cellIsAlive(window.states, i+x, j+y)) {
+                        aliveNeighbors++
                     }
                 }
             }
+
+            if(states[i*window.numCols+j] === true) {
+                if(aliveNeighbors < 2) {
+                    newStates.push(false)  // underpopulation
+                }
+                else if(aliveNeighbors < 4) {
+                    newStates.push(true)
+                }
+                else {
+                    newStates.push(false)  // overpopulation
+                }
+            }
+            else {
+                if (aliveNeighbors === 3) {
+                    newStates.push(true)   // reproduction
+                }
+                else {
+                    newStates.push(false)
+                }
+            }
+            
         }
 
         window.states = newStates
@@ -341,7 +354,7 @@ export function loadState() {
  */
 export function rotateShape(shape) {
     //GosperGun_SouthEast: {
-    //    aliveCells: (36)[4, 5, 13, 14, 94, 95, 96, 102, 106, 110, 116, 119, 125, 131, 138, 142, 148, 149, 150, 158, 182, 183, 184, 191, 192, 193, 199, 203, 216, 217, 221, 222, 308, 309, 317, 318],
+    //    aliveCells: [4, 5, 13, 14, 94, 95, 96, 102, 106, 110, 116, 119, 125, 131, 138, 142, 148, 149, 150, 158, 182, 183, 184, 191, 192, 193, 199, 203, 216, 217, 221, 222, 308, 309, 317, 318],
     //    height: 9,
     //    width: 36,
     //}
@@ -356,7 +369,7 @@ export function rotateShape(shape) {
         width: shape.height,
     }
 
-    for(cell of shape.aliveCells) {
+    for(let cell of shape.aliveCells) {
         var intX = Math.floor(cell / shape.height)
         var intY = cell % shape.height
 

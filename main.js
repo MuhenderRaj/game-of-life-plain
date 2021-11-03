@@ -9,16 +9,16 @@ import {presets} from './modules/presets.js';
  */
 export function init() {
     // Global constants //
-    window.numCols = 100
-    window.cellSize = 10
+    window.NUM_COLS = 100
+    window.g_cell_size = 10
 
     // HTML elements //
-    window.canvas = document.getElementById('game')
-    window.ctx = canvas.getContext('2d')
-    window.speed = document.getElementById("speed")
-    window.gridShown = document.getElementById("grid-show")
-    window.pausedElem = document.getElementById("paused")
-    window.selectPreset = document.getElementById("presets")
+    window.g_canvas = document.getElementById('game')
+    window.g_ctx = g_canvas.getContext('2d')
+    window.g_speed = document.getElementById("speed")
+    window.g_gridShown = document.getElementById("grid-show")
+    window.g_pausedElem = document.getElementById("paused")
+    window.g_selectPreset = document.getElementById("presets")
     
     // Related to selecting cells //
     window.isSelecting = false
@@ -56,19 +56,19 @@ export function init() {
     window.presets = presets
     
     // Mouse event listeners //
-    window.canvas.addEventListener("mousemove", e => {
+    g_canvas.addEventListener("mousemove", e => {
         var [x, y] = getmousePosition(e)
         window.mouseCoords = {x: x, y: y}
-        var intX = Math.floor(x / window.cellSize)
-        var intY = Math.floor(y / window.cellSize)
+        var intX = Math.floor(x / g_cell_size)
+        var intY = Math.floor(y / g_cell_size)
         
         window.mouseCell = {x:intX, y: intY}
     })
     
-    window.canvas.addEventListener("click", e => {
+    g_canvas.addEventListener("click", e => {
         var [x, y] = getmousePosition(e)
-        var intX = Math.floor(x / window.cellSize)
-        var intY = Math.floor(y / window.cellSize)
+        var intX = Math.floor(x / g_cell_size)
+        var intY = Math.floor(y / g_cell_size)
         if(e.shiftKey) { // select click
             if(!window.isSelecting) { // First endpoint of rect
                 window.isSelecting = true
@@ -88,17 +88,21 @@ export function init() {
         }
         else { // normal click
             // Flip relevant cell
-            window.states[intX*window.numCols+intY] = !(window.states[intX*window.numCols+intY])
+            window.states[intX*NUM_COLS+intY] = !(window.states[intX*NUM_COLS+intY])
             //window.started = true
         }
     })
 
-    window.canvas.addEventListener('keydown', function(event) {
+    g_canvas.addEventListener('keydown', function(event) {
         if(event.ctrlKey && event.key === 'c') {
             copySelection()
         }
         else if(event.ctrlKey && event.key === 'v') {
             replaceWithSelection()
+        }
+        else if(event.key === 'ArrowUp') {
+            // TODO
+            console.log('TODO')
         }
     });
     
@@ -110,16 +114,16 @@ export function init() {
  * The main update method of the program
  */
 function update() {
-    if(window.selectPreset.selectedIndex !== 0) {
-        window.copiedArea = window.presets[window.selectPreset.options[window.selectPreset.selectedIndex].value]
+    if(g_selectPreset.selectedIndex !== 0) {
+        window.copiedArea = window.presets[g_selectPreset.options[g_selectPreset.selectedIndex].value]
     }
     
     // If not paused
-    if(!window.pausedElem.checked) {
+    if(!g_pausedElem.checked) {
         // Game of life logic
         var newStates = []
-        for(let i = 0; i < window.numCols; i++) {
-            for(let j = 0; j < window.numCols; j++) {
+        for(let i = 0; i < NUM_COLS; i++) {
+            for(let j = 0; j < NUM_COLS; j++) {
                 let aliveNeighbors = 0
                 for(let x = -1; x <= 1; x++) {
                     for(let y = -1; y <= 1; y++) {
@@ -133,7 +137,7 @@ function update() {
                     }
                 }
 
-                if(states[i*window.numCols+j] === true) {
+                if(states[i*NUM_COLS+j] === true) {
                     if(aliveNeighbors < 2) {
                         newStates.push(false)  // underpopulation
                     }
@@ -166,7 +170,7 @@ function draw() {
     var el = document.createElement("div")
     el.setAttribute("class", "")
     // Draw background
-    var ctx = window.ctx   // Convenience
+    var ctx = g_ctx   // Convenience
     ctx.fillStyle = 'rgb(255, 255, 255)'
     ctx.fillRect(0, 0, 1000, 1000)
     
@@ -174,17 +178,17 @@ function draw() {
     update()
     
     // Draw the grid
-    for(let x = 0; x < window.numCols; x++) {
-        for(let y = 0; y < window.numCols; y++) {
-            if(window.states[x*window.numCols+y]) {
+    for(let x = 0; x < NUM_COLS; x++) {
+        for(let y = 0; y < NUM_COLS; y++) {
+            if(window.states[x*NUM_COLS+y]) {
                 ctx.fillStyle = 'rgb(0, 0, 0)'
-                ctx.fillRect(x*window.cellSize, y*window.cellSize, window.cellSize, window.cellSize)
+                ctx.fillRect(x*g_cell_size, y*g_cell_size, g_cell_size, g_cell_size)
             }
-            else if (window.gridShown.checked) {
+            else if (g_gridShown.checked) {
                 //ctx.fillStyle = 'rgb(255, 255, 255)'
                 ctx.strokeStyle = 'rgb(180, 180, 180)'
                 ctx.lineWidth = 0.5
-                ctx.strokeRect(x*window.cellSize, y*window.cellSize, window.cellSize, window.cellSize)
+                ctx.strokeRect(x*g_cell_size, y*g_cell_size, g_cell_size, g_cell_size)
             }
         }
     }
@@ -193,34 +197,34 @@ function draw() {
     if(! Number.isNaN(window.selectCells.startX)) {
         ctx.fillStyle = 'rgba(0, 125, 0, 0.2)'
         if(Number.isNaN(window.selectCells.endX)) {
-            let width = window.mouseCoords.x - window.selectCells.startX*window.cellSize
-            let height = window.mouseCoords.y - window.selectCells.startY*window.cellSize
-            ctx.fillRect(window.selectCells.startX * window.cellSize, window.selectCells.startY * window.cellSize, width, height)
+            let width = window.mouseCoords.x - window.selectCells.startX*g_cell_size
+            let height = window.mouseCoords.y - window.selectCells.startY*g_cell_size
+            ctx.fillRect(window.selectCells.startX * g_cell_size, window.selectCells.startY * g_cell_size, width, height)
         }
         else {
-            let width = (window.selectCells.endX - window.selectCells.startX)*window.cellSize
-            let height = (window.selectCells.endY - window.selectCells.startY)*window.cellSize
-            ctx.fillRect(window.selectCells.startX * window.cellSize, window.selectCells.startY * window.cellSize, width, height)
+            let width = (window.selectCells.endX - window.selectCells.startX)*g_cell_size
+            let height = (window.selectCells.endY - window.selectCells.startY)*g_cell_size
+            ctx.fillRect(window.selectCells.startX * g_cell_size, window.selectCells.startY * g_cell_size, width, height)
         }
     }
     
     // Grey-shade the box the mouse is on
     ctx.fillStyle = 'rgb(150, 150, 150)'
-    ctx.fillRect(window.mouseCell.x * window.cellSize, window.mouseCell.y * window.cellSize, window.cellSize, window.cellSize)
+    ctx.fillRect(window.mouseCell.x * g_cell_size, window.mouseCell.y * g_cell_size, g_cell_size, g_cell_size)
     
     // Red-shade the box marked to be the paste location
     if(! Number.isNaN(window.pasteCell.posX) && window.copiedArea.aliveCells.length !== 0) {
         ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
-        //ctx.fillRect(window.pasteCell.posX * window.cellSize, window.pasteCell.posY * window.cellSize, window.cellSize, window.cellSize)
+        //ctx.fillRect(window.pasteCell.posX * g_cell_size, window.pasteCell.posY * g_cell_size, g_cell_size, g_cell_size)
         for(let cell of window.copiedArea.aliveCells) {
             var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
             var yInd = window.pasteCell.posY + cell % window.copiedArea.height
-            ctx.fillRect(xInd*window.cellSize, yInd*window.cellSize, window.cellSize, window.cellSize)
+            ctx.fillRect(xInd*g_cell_size, yInd*g_cell_size, g_cell_size, g_cell_size)
         }
     }
     
     // Call next iteration with a time gap
-    setTimeout(draw, Math.floor(1000 / window.speed.value))
+    setTimeout(draw, Math.floor(1000 / g_speed.value))
 }
 
 /////////////////////////
@@ -233,7 +237,7 @@ function draw() {
  * @returns the coordinates of the mouse
  */
 function getmousePosition(event) {
-    let rect = window.canvas.getBoundingClientRect()
+    let rect = g_canvas.getBoundingClientRect()
     let x = event.clientX - rect.left
     let y = event.clientY - rect.top
     return [x, y]
@@ -247,8 +251,8 @@ function getmousePosition(event) {
 function getMouseCell(event) {
     let [x, y] = getmousePosition(event)
     
-    var intX = Math.floor(x / window.cellSize)
-    var intY = Math.floor(y / window.cellSize)
+    var intX = Math.floor(x / g_cell_size)
+    var intY = Math.floor(y / g_cell_size)
     
     return [intX, intY]
 }
@@ -261,7 +265,7 @@ function getMouseCell(event) {
  * @returns {boolean} whether the cell is alive and valid
  */
 function cellIsAlive(states, x, y) {
-    let side = window.numCols
+    let side = NUM_COLS
     if(x < 0 || x >= side || y < 0 || y >= side) {
         return false
     }
@@ -273,7 +277,7 @@ function cellIsAlive(states, x, y) {
  * Clears the grid, killing all the cells
  */
 function clearGrid() {
-    window.states = new Array(window.numCols*window.numCols).fill(false, 0, window.numCols*window.numCols)
+    window.states = new Array(NUM_COLS*NUM_COLS).fill(false, 0, NUM_COLS*NUM_COLS)
 }
 
 /**
@@ -289,7 +293,7 @@ function copySelection() {
     window.copiedArea.aliveCells = []
     for(let i = 0; i < window.copiedArea.width; i++) {
         for(let j = 0; j < window.copiedArea.height; j++) {
-            if(window.states[(startX+i) * window.numCols + (startY+j)]) {
+            if(window.states[(startX+i) * NUM_COLS + (startY+j)]) {
                 window.copiedArea.aliveCells.push(i * window.copiedArea.height + j)
             }
         }
@@ -303,7 +307,7 @@ function replaceWithSelection() {
     for(let cell of window.copiedArea.aliveCells) {
         var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
         var yInd = window.pasteCell.posY + cell % window.copiedArea.height
-        window.states[xInd*window.numCols + yInd] = true
+        window.states[xInd*NUM_COLS + yInd] = true
     }
 }
 
@@ -312,7 +316,7 @@ function replaceWithSelection() {
  */
 export function saveState() {
     let liveCells = []
-    for(let i = 0; i < window.numCols * window.numCols; i++) {
+    for(let i = 0; i < NUM_COLS * NUM_COLS; i++) {
         if(window.states[i]) {
             liveCells.push(i)
         }

@@ -3,14 +3,18 @@
 <head>
     <meta charset='utf-8' />
     <title>Game of Life</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <link rel='stylesheet' type='text/css' media='screen' href='main.css' />
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <script type="module">
-        import {init} from './main.js'
+        import {init, saveState, loadState, rotateShape} from './main.js'
         import {presets} from './modules/presets.js'
+        let localPresets = JSON.parse(localStorage.getItem("customPresets"))
 
         window.init = init
+        window.saveState = saveState
+        window.loadState = loadState
+        window.rotateShape = rotateShape
 
         let presetsContainer = document.getElementById("presets")
         let option = document.createElement("option")
@@ -18,11 +22,23 @@
         option.setAttribute("selected", "selected")
         option.innerText = "none"
         presetsContainer.appendChild(option)
+        
+        // Load built-in presets
         for(let preset in presets) {
             let option = document.createElement("option")
             option.setAttribute("value", preset)
             option.innerText = preset  // Ideally the name of the preset
             presetsContainer.appendChild(option)
+        }
+        
+        if (localPresets != null) {
+            // Load custom presets, if any
+            for (let customPreset in localPresets) {
+                let option = document.createElement("option")
+                option.setAttribute("value", customPreset)
+                option.innerText = customPreset
+                presetsContainer.appendChild(option)
+            }
         }
     </script>
     <script src='styling.js'></script>
@@ -45,8 +61,9 @@
         Shift-leftclick to start selecting cells.<br />
         Shift-leftclick again to confirm selected cells.<br />
         Ctrl-c to copy the selected cells.<br />
-        Alt-leftclick to designate location to paste copied cells.<br />
-        Ctrl-v to paste the selected cells at this location.
+        Ctrl-v to paste the selected cells at this location.<br />
+        r to rotate selection.<br />
+        c to clear selection.
     </div>
 
     <div id="controls">
@@ -68,7 +85,7 @@
             <button onclick="copySelection();">Copy Selection</button>
             <button onclick="replaceWithSelection();">Replace With Selection</button>
         -->
-        <button onclick="window.copiedArea = rotateShape();">Rotate Selection</button>
+        <button onclick="rotateShape();">Rotate Selection</button>
 
         <select id="presets"></select>
     </div>

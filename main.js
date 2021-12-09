@@ -46,14 +46,16 @@ export function init() {
         y: NaN
     }
 
-    // Paste position //
-    window.pasteCell = {
-        posX: NaN,
-        posY: NaN
+    
+    // add custom presets, if any
+    let customPresets = JSON.parse(localStorage.getItem("customPresets"))
+    if (customPresets != null) {
+        window.presets = {...presets, ...customPresets}
     }
-
-    // Default game of life presets to copy //
-    window.presets = presets
+    else {
+        // Default game of life presets to copy //
+        window.presets = presets
+    }
     
     // Mouse event listeners //
     g_canvas.addEventListener("mousemove", e => {
@@ -62,7 +64,7 @@ export function init() {
         var intX = Math.floor(x / g_cell_size)
         var intY = Math.floor(y / g_cell_size)
         
-        window.mouseCell = {x:intX, y: intY}
+        window.mouseCell = {x: intX, y: intY}
     })
     
     g_canvas.addEventListener("click", e => {
@@ -83,9 +85,6 @@ export function init() {
                 window.isSelecting = false
             }
         }
-        else if(e.altKey) { // paste click
-            window.pasteCell = {posX: intX, posY: intY}
-        }
         else { // normal click
             // Flip relevant cell
             window.states[intX*NUM_COLS+intY] = !(window.states[intX*NUM_COLS+intY])
@@ -93,12 +92,24 @@ export function init() {
         }
     })
 
-    g_canvas.addEventListener('keydown', function(event) {
-        if(event.ctrlKey && event.key === 'c') {
-            copySelection()
+    window.addEventListener('keydown', function(event) {
+        if (event.ctrlKey) {
+            if (event.key === 'c') {
+                copySelection()
+            }
+            else if (event.key === 'v') {
+                replaceWithSelection()
+            }
         }
-        else if(event.ctrlKey && event.key === 'v') {
-            replaceWithSelection()
+        else if (event.key === 'r') {
+            rotateShape()
+        }
+        else if (event.key === 'c') {
+            window.copiedArea = {
+                aliveCells: [],
+                width: NaN,
+                height: NaN
+            }
         }
         else if(event.key === 'ArrowUp') {
             // TODO
@@ -116,6 +127,7 @@ export function init() {
 function update() {
     if(g_selectPreset.selectedIndex !== 0) {
         window.copiedArea = window.presets[g_selectPreset.options[g_selectPreset.selectedIndex].value]
+        g_selectPreset.selectedIndex = 0 // TODO: This is a hacky fix to fix continuously reassigning
     }
     
     // If not paused
@@ -161,6 +173,8 @@ function update() {
 
         window.states = newStates
     }
+    
+    // g_canvas.focus({preventScroll: true})
 }
 
 /**
@@ -213,12 +227,23 @@ function draw() {
     ctx.fillRect(window.mouseCell.x * g_cell_size, window.mouseCell.y * g_cell_size, g_cell_size, g_cell_size)
     
     // Red-shade the box marked to be the paste location
-    if(! Number.isNaN(window.pasteCell.posX) && window.copiedArea.aliveCells.length !== 0) {
+    // if(! Number.isNaN(window.pasteCell.posX) && window.copiedArea.aliveCells.length !== 0) {
+    //     ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
+    //     //ctx.fillRect(window.pasteCell.posX * g_cell_size, window.pasteCell.posY * g_cell_size, g_cell_size, g_cell_size)
+    //     for(let cell of window.copiedArea.aliveCells) {
+    //         var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
+    //         var yInd = window.pasteCell.posY + cell % window.copiedArea.height
+    //         ctx.fillRect(xInd*g_cell_size, yInd*g_cell_size, g_cell_size, g_cell_size)
+    //     }
+    // }
+
+    // Red-shade the box marked to be the paste location
+    if(window.copiedArea.aliveCells.length !== 0) {
         ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
         //ctx.fillRect(window.pasteCell.posX * g_cell_size, window.pasteCell.posY * g_cell_size, g_cell_size, g_cell_size)
         for(let cell of window.copiedArea.aliveCells) {
-            var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
-            var yInd = window.pasteCell.posY + cell % window.copiedArea.height
+            var xInd = window.mouseCell.x + Math.floor(cell / window.copiedArea.height)
+            var yInd = window.mouseCell.y + cell % window.copiedArea.height
             ctx.fillRect(xInd*g_cell_size, yInd*g_cell_size, g_cell_size, g_cell_size)
         }
     }
@@ -301,12 +326,18 @@ function copySelection() {
 }
 
 /**
- * Replaces the cells starting at the alt-clicked cell with thw cells in copiedArea
+ * Replaces the cells starting at the mouse pointing cell with the cells in copiedArea
+ * Doesn't do anything if there is no selection
  */
 function replaceWithSelection() {
+    if (window.copiedArea.aliveCells.length === 0) {
+        return
+
+    }
+
     for(let cell of window.copiedArea.aliveCells) {
-        var xInd = window.pasteCell.posX + Math.floor(cell / window.copiedArea.height)
-        var yInd = window.pasteCell.posY + cell % window.copiedArea.height
+        var xInd = window.mouseCell.x + Math.floor(cell / window.copiedArea.height)
+        var yInd = window.mouseCell.y + cell % window.copiedArea.height
         window.states[xInd*NUM_COLS + yInd] = true
     }
 }
@@ -340,19 +371,15 @@ export function loadState() {
 
 /**
  * Returns a new shape that is the original shape rotated 90 degrees anticlockwise
- * @param {{aliveCells: number[], height: number, width: number}} [shape=window.copiedArea] the shape to be rotated. By default the copied shape
+ * @param {{aliveCells: number[], height: number, width: number}} shape the shape to be rotated
  * @returns {{aliveCells: number[], height: number, width: number}} the anticlockwise rotated shape
  */
-export function rotateShape(shape) {
+function rotate(shape) {
     //GosperGun_SouthEast: {
     //    aliveCells: (36)[4, 5, 13, 14, 94, 95, 96, 102, 106, 110, 116, 119, 125, 131, 138, 142, 148, 149, 150, 158, 182, 183, 184, 191, 192, 193, 199, 203, 216, 217, 221, 222, 308, 309, 317, 318],
     //    height: 9,
     //    width: 36,
     //}
-
-    if(!shape) {
-        shape = window.copiedArea
-    }
 
     let newShape = {
         aliveCells: [],
@@ -360,7 +387,7 @@ export function rotateShape(shape) {
         width: shape.height,
     }
 
-    for(cell of shape.aliveCells) {
+    for(let cell of shape.aliveCells) {
         var intX = Math.floor(cell / shape.height)
         var intY = cell % shape.height
 
@@ -371,4 +398,8 @@ export function rotateShape(shape) {
     }
 
     return newShape
+}
+
+export function rotateShape() {
+    window.copiedArea = rotate(window.copiedArea)
 }

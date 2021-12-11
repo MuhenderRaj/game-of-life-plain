@@ -192,9 +192,9 @@ function draw() {
     update()
     
     // Draw the grid
-    for(let x = 0; x < NUM_COLS; x++) {
-        for(let y = 0; y < NUM_COLS; y++) {
-            if(window.states[x*NUM_COLS+y]) {
+    for (let x = 0; x < NUM_COLS; x++) {
+        for (let y = 0; y < NUM_COLS; y++) {
+            if (window.states[x*NUM_COLS+y]) {
                 ctx.fillStyle = 'rgb(0, 0, 0)'
                 ctx.fillRect(x*g_cell_size, y*g_cell_size, g_cell_size, g_cell_size)
             }
@@ -208,9 +208,9 @@ function draw() {
     }
     
     // Draw the selection box
-    if(! Number.isNaN(window.selectCells.startX)) {
+    if (! Number.isNaN(window.selectCells.startX)) {
         ctx.fillStyle = 'rgba(0, 125, 0, 0.2)'
-        if(Number.isNaN(window.selectCells.endX)) {
+        if (Number.isNaN(window.selectCells.endX)) {
             let width = window.mouseCoords.x - window.selectCells.startX*g_cell_size
             let height = window.mouseCoords.y - window.selectCells.startY*g_cell_size
             ctx.fillRect(window.selectCells.startX * g_cell_size, window.selectCells.startY * g_cell_size, width, height)

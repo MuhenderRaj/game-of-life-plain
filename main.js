@@ -9,14 +9,19 @@ import {presets} from './modules/presets.js';
  */
 export function init() {
     // Global constants //
-    window.NUM_COLS = 100
-    window.g_cell_size = 10
-
+    window.NUM_COLS = 1000
+    
     window.DISPLAY_COLS = 100
+    window.g_cell_size = 1000 / DISPLAY_COLS
+
     window.g_topLeft = {
         x: 0,
         y: 0,
     }
+
+    window.aliveCells = new Set()
+    
+    window.updated = new Set()
 
     // HTML elements //
     window.g_canvas = document.getElementById('game')
@@ -94,45 +99,80 @@ export function init() {
         else { // normal click
             // Flip relevant cell
             let cellIndex = (intX + g_topLeft.x)*NUM_COLS+(intY + g_topLeft.y)
-            window.states[cellIndex] = !(window.states[cellIndex])
+            if (window.aliveCells.has(cellIndex)) {
+                window.aliveCells.delete(cellIndex)
+            }
+            else {
+                window.aliveCells.add(cellIndex)
+            }
+            window.updated.add(cellIndex)
+            // window.states[cellIndex] = !(window.states[cellIndex])
             //window.started = true
         }
     })
 
     window.addEventListener('keydown', function(event) {
         if (event.ctrlKey) {
-            if (event.key === 'c') {
-                copySelection()
+            switch(event.key) {
+                case 'c':
+                    copySelection()
+                    break
+                
+                case 'v':
+                    replaceWithSelection()
+                    break
+                    
+                case '+':
+                    event.preventDefault()
+                    if (DISPLAY_COLS > 0)
+                        DISPLAY_COLS--
+                        g_cell_size = 1000 / DISPLAY_COLS
+                    break
+                    
+                case '-':
+                    event.preventDefault()
+                    if (DISPLAY_COLS < NUM_COLS)
+                        DISPLAY_COLS++
+                        g_cell_size = 1000 / DISPLAY_COLS
+                    break
+                
             }
-            else if (event.key === 'v') {
-                replaceWithSelection()
+        }
+        else {
+            switch(event.key) {
+                case 'r':
+                    rotateShape()
+                    break
+                    
+                case 'c':
+                    window.copiedArea = {
+                        aliveCells: [],
+                        width: NaN,
+                        height: NaN
+                    }
+                    break
+                    
+                case 'ArrowRight':
+                    event.preventDefault()
+                    if (g_topLeft.x < NUM_COLS - DISPLAY_COLS)
+                        g_topLeft.x++
+                    break
+                case 'ArrowLeft':
+                    event.preventDefault()
+                    if (g_topLeft.x > 0)
+                        g_topLeft.x--
+                    break
+                case 'ArrowDown':
+                    event.preventDefault()
+                    if (g_topLeft.y < NUM_COLS - DISPLAY_COLS)
+                        g_topLeft.y++
+                    break
+                case 'ArrowUp':
+                    event.preventDefault()
+                    if (g_topLeft.y > 0)
+                        g_topLeft.y--
+                    break
             }
-        }
-        else if (event.key === 'r') {
-            rotateShape()
-        }
-        else if (event.key === 'c') {
-            window.copiedArea = {
-                aliveCells: [],
-                width: NaN,
-                height: NaN
-            }
-        }
-        else if(event.key === 'ArrowRight') {
-            // TODO
-            g_topLeft.x += 1
-        }
-        else if(event.key === 'ArrowLeft') {
-            // TODO
-            g_topLeft.x -= 1
-        }
-        else if(event.key === 'ArrowUp') {
-            // TODO
-            g_topLeft.y -= 1
-        }
-        else if(event.key === 'ArrowDown') {
-            // TODO
-            g_topLeft.y += 1
         }
     });
     
@@ -152,45 +192,55 @@ function update() {
     // If not paused
     if(!g_pausedElem.checked) {
         // Game of life logic
-        var newStates = []
-        for(let i = 0; i < NUM_COLS; i++) {
-            for(let j = 0; j < NUM_COLS; j++) {
-                let aliveNeighbors = 0
-                for(let x = -1; x <= 1; x++) {
-                    for(let y = -1; y <= 1; y++) {
-                        if(x === 0 && y === 0) {
-                            continue
-                        }
-                        
-                        if(cellIsAlive(window.states, i+x, j+y)) {
-                            aliveNeighbors++
-                        }
-                    }
-                }
 
-                if(states[i*NUM_COLS+j] === true) {
-                    if(aliveNeighbors < 2) {
-                        newStates.push(false)  // underpopulation
-                    }
-                    else if(aliveNeighbors < 4) {
-                        newStates.push(true)
-                    }
-                    else {
-                        newStates.push(false)  // overpopulation
-                    }
-                }
-                else {
-                    if (aliveNeighbors === 3) {
-                        newStates.push(true)   // reproduction
-                    }
-                    else {
-                        newStates.push(false)
-                    }
+        var newAliveCells = new Set()
+        var toBeChecked = new Set()
+        for(let cell of window.aliveCells) {
+            let [x, y] = coordsFromIndex(cell)
+            for(let i = -1; i <= 1; i++) {
+                for(let j = -1; j <= 1; j++) { 
+                    toBeChecked.add(indexFromCoords(x+i, y+j))
                 }
             }
         }
 
-        window.states = newStates
+        for(let cell of toBeChecked) {
+            let [i, j] = coordsFromIndex(cell)
+            let aliveNeighbors = 0
+            for(let x = -1; x <= 1; x++) {
+                for(let y = -1; y <= 1; y++) { 
+                    if(x === 0 && y === 0) {
+                        continue
+                    }
+                    
+                    if(cellIsAlive(window.aliveCells, i+x, j+y)) {
+                        aliveNeighbors++
+                    }
+                }
+            }
+
+            if(cellIsAlive(window.aliveCells, i, j)) {
+                if(aliveNeighbors < 2) {
+                    //newStates.push(false)  // underpopulation
+                }
+                else if(aliveNeighbors < 4) {
+                    newAliveCells.add(cell)
+                }
+                else {
+                    //newStates.push(false)  // overpopulation
+                }
+            }
+            else {
+                if (aliveNeighbors === 3) {
+                    newAliveCells.add(cell)   // reproduction
+                }
+                else {
+                    //newStates.push(false)
+                }
+            }
+        }
+
+        window.aliveCells = newAliveCells
     }
     
     // g_canvas.focus({preventScroll: true})
@@ -213,7 +263,7 @@ function draw() {
     // Draw the grid
     for (let x = 0; x < DISPLAY_COLS; x++) {
         for (let y = 0; y < DISPLAY_COLS; y++) {
-            if (window.states[(x + g_topLeft.x) * NUM_COLS + (y + g_topLeft.y)]) {
+            if (cellIsAlive(window.aliveCells, x + g_topLeft.x, y + g_topLeft.y)) {
                 ctx.fillStyle = 'rgb(0, 0, 0)'
                 ctx.fillRect(x*g_cell_size, y*g_cell_size, g_cell_size, g_cell_size)
             }
@@ -304,25 +354,44 @@ function getMouseCell(event) {
 
 /**
  * 
- * @param {boolean[]} states the array of cells to search in
+ * @param {boolean[]} aliveCells the array of alive cells to search in
  * @param {number} x the x value of the cell
  * @param {number} y the y value of the cell
  * @returns {boolean} whether the cell is alive and valid
  */
-function cellIsAlive(states, x, y) {
+function cellIsAlive(aliveCells, x, y) {
     let side = NUM_COLS
     if(x < 0 || x >= side || y < 0 || y >= side) {
         return false
     }
     
-    return states[x*side+y]
+    return aliveCells.has(x*side+y)
 }
 
 /**
  * Clears the grid, killing all the cells
  */
 function clearGrid() {
-    window.states = new Array(NUM_COLS*NUM_COLS).fill(false, 0, NUM_COLS*NUM_COLS)
+    window.aliveCells = new Set()
+}
+
+/**
+ * 
+ * @param {number} index the index of the cell in column major order
+ * @returns the coordinates as an object 
+ */
+function coordsFromIndex(index) {
+    return [Math.floor(index / NUM_COLS), index % NUM_COLS]
+}
+
+/**
+ * 
+ * @param {number} x the x coordinate of the cell
+ * @param {number} y the y coordinate of the cell
+ * @returns {number} the index of the cell
+ */
+function indexFromCoords(x, y) {
+    return x * NUM_COLS + y
 }
 
 /**
@@ -338,7 +407,7 @@ function copySelection() {
     window.copiedArea.aliveCells = []
     for(let i = 0; i < window.copiedArea.width; i++) {
         for(let j = 0; j < window.copiedArea.height; j++) {
-            if(window.states[(g_topLeft.x+startX+i) * NUM_COLS + (g_topLeft.y+startY+j)]) {
+            if(window.aliveCells.has(indexFromCoords(g_topLeft.x+startX+i, g_topLeft.y+startY+j))) {
                 window.copiedArea.aliveCells.push(i * window.copiedArea.height + j)
             }
         }
@@ -357,7 +426,7 @@ function replaceWithSelection() {
     for(let cell of window.copiedArea.aliveCells) {
         var xInd = g_topLeft.x + window.mouseCell.x + Math.floor(cell / window.copiedArea.height)
         var yInd = g_topLeft.y + window.mouseCell.y + cell % window.copiedArea.height
-        window.states[xInd*NUM_COLS + yInd] = true
+        window.aliveCells.add(indexFromCoords(xInd, yInd))
     }
 }
 
@@ -365,12 +434,14 @@ function replaceWithSelection() {
  * Saves the current grid to localStorage
  */
 export function saveState() {
-    let liveCells = []
-    for(let i = 0; i < NUM_COLS * NUM_COLS; i++) {
-        if(window.states[i]) {
-            liveCells.push(i)
-        }
-    }
+    // let liveCells = []
+    // for(let i = 0; i < NUM_COLS * NUM_COLS; i++) {
+    //     if(window.states[i]) {
+    //         liveCells.push(i)
+    //     }
+    // }
+    
+    let liveCells = Array.from(window.aliveCells)
 
     localStorage.setItem("state", JSON.stringify(liveCells))
 }
@@ -381,11 +452,13 @@ export function saveState() {
 export function loadState() {
     let liveCells = JSON.parse(localStorage.getItem("state"))
 
-    clearGrid()
+    // clearGrid()
 
-    for(let i of liveCells) {
-        window.states[i] = true
-    }
+    // for(let i of liveCells) {
+    //     window.states[i] = true
+    // }
+    
+    window.aliveCells = new Set(liveCells) 
 }
 
 /**

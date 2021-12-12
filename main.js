@@ -30,6 +30,7 @@ export function init() {
     window.g_gridShown = document.getElementById("grid-show")
     window.g_pausedElem = document.getElementById("paused")
     window.g_selectPreset = document.getElementById("presets")
+    window.g_saveName = document.getElementById("save-name")
     
     // Related to selecting cells //
     window.isSelecting = false
@@ -117,9 +118,19 @@ export function init() {
                 case 'c':
                     copySelection()
                     break
+                    
+                case 'x':
+                    copySelection()
+                    clearSelection()
+                    break
                 
                 case 'v':
                     replaceWithSelection()
+                    break
+                    
+                case 's':
+                    event.preventDefault()
+                    saveSelection()
                     break
                     
                 case '+':
@@ -150,6 +161,16 @@ export function init() {
                         width: NaN,
                         height: NaN
                     }
+
+                    window.selectCells = {
+                        startX: NaN,
+                        startY: NaN,
+                        endX: NaN,
+                        endY: NaN
+                    }
+
+                    window.isSelecting = false
+
                     break
                     
                 case 'ArrowRight':
@@ -415,6 +436,25 @@ function copySelection() {
 }
 
 /**
+ * Clears the selected cells that are alive
+ */
+function clearSelection() {
+    window.copiedArea.width = Math.abs(window.selectCells.startX - window.selectCells.endX)
+    window.copiedArea.height = Math.abs(window.selectCells.startY - window.selectCells.endY)
+
+    let startX = Math.min(window.selectCells.startX, window.selectCells.endX)
+    let startY = Math.min(window.selectCells.startY, window.selectCells.endY)
+
+    for(let i = 0; i < window.copiedArea.width; i++) {
+        for(let j = 0; j < window.copiedArea.height; j++) {
+            if(window.aliveCells.has(indexFromCoords(g_topLeft.x+startX+i, g_topLeft.y+startY+j))) {
+                window.aliveCells.delete(indexFromCoords(g_topLeft.x+startX+i, g_topLeft.y+startY+j))
+            }
+        }
+    }
+}
+
+/**
  * Replaces the cells starting at the mouse pointing cell with the cells in copiedArea
  * Doesn't do anything if there is no selection
  */
@@ -428,6 +468,12 @@ function replaceWithSelection() {
         var yInd = g_topLeft.y + window.mouseCell.y + cell % window.copiedArea.height
         window.aliveCells.add(indexFromCoords(xInd, yInd))
     }
+}
+
+function saveSelection() {
+    let presets = JSON.parse(localStorage.getItem("customPresets"))
+    presets = {...presets, [g_saveName.value]: window.copiedArea}
+    localStorage.setItem("customPresets", JSON.stringify(presets))
 }
 
 /**

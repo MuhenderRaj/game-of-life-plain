@@ -61,12 +61,14 @@
         Shift-leftclick to start selecting cells.<br />
         Shift-leftclick again to confirm selected cells.<br />
         Ctrl-c to copy the selected cells.<br />
+        Ctrl-x to cut the selected cells.<br />
         Ctrl-v to paste the selected cells at this location.<br />
         r to rotate selection.<br />
         c to clear selection.<br />
-        ctrl-+ to zoom in.<br />
-        ctrl-- to zoom out.<br />
+        Ctrl-+ to zoom in.<br />
+        Ctrl-- to zoom out.<br />
         arrow keys to pan.<br />
+        Ctrl-s after typing name of preset to save custom preset.<br />
     </div>
 
     <div id="controls">
@@ -91,6 +93,8 @@
         <button onclick="rotateShape();">Rotate Selection</button>
 
         <select id="presets"></select>
+        
+        <input type="text" id="save-name" placeholder="Name to Save" />
     </div>
 
     <canvas id="game" width="1000" height="1000" tabindex='1'>

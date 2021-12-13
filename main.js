@@ -300,16 +300,19 @@ function draw() {
     // Draw the selection box
     if (! Number.isNaN(window.selectCells.startX)) {
         ctx.fillStyle = 'rgba(0, 125, 0, 0.2)'
+        
+        let x1, x2, y1, y2
+        [x2, y2] = [window.selectCells.startX, window.selectCells.startY]
+        
         if (Number.isNaN(window.selectCells.endX)) {
-            let width = window.mouseCoords.x - window.selectCells.startX*g_cell_size
-            let height = window.mouseCoords.y - window.selectCells.startY*g_cell_size
-            ctx.fillRect(window.selectCells.startX * g_cell_size, window.selectCells.startY * g_cell_size, width, height)
+            [x1, y1] = getMouseCell(window.mouseCoords)
         }
         else {
-            let width = (window.selectCells.endX - window.selectCells.startX)*g_cell_size
-            let height = (window.selectCells.endY - window.selectCells.startY)*g_cell_size
-            ctx.fillRect(window.selectCells.startX * g_cell_size, window.selectCells.startY * g_cell_size, width, height)
+            [x1, y1] = [window.selectCells.endX, window.selectCells.endY]
         }
+        let [x_min, y_min] = [Math.min(x1, x2), Math.min(y1, y2)]
+        let [x_max, y_max] = [Math.max(x1, x2), Math.max(y1, y2)]
+        ctx.fillRect(x_min*g_cell_size, y_min*g_cell_size, (x_max-x_min+1)*g_cell_size, (y_max-y_min+1)*g_cell_size)
     }
     
     // Grey-shade the box the mouse is on
@@ -361,11 +364,11 @@ function getmousePosition(event) {
 
 /**
  * 
- * @param {Event} event 
+ * @param {{x: number, y: number}} mousePosition the raw coordinates of the mouse
  * @returns the cell the mouse is currently in
  */
-function getMouseCell(event) {
-    let [x, y] = getmousePosition(event)
+function getMouseCell(mousePosition) {
+    let {x, y} = mousePosition
     
     var intX = Math.floor(x / g_cell_size)
     var intY = Math.floor(y / g_cell_size)
@@ -419,8 +422,8 @@ function indexFromCoords(x, y) {
  * Copies the selected cells to the copiedArea variable
  */
 function copySelection() {
-    window.copiedArea.width = Math.abs(window.selectCells.startX - window.selectCells.endX)
-    window.copiedArea.height = Math.abs(window.selectCells.startY - window.selectCells.endY)
+    window.copiedArea.width = Math.abs(window.selectCells.startX - window.selectCells.endX) + 1
+    window.copiedArea.height = Math.abs(window.selectCells.startY - window.selectCells.endY) + 1
 
     let startX = Math.min(window.selectCells.startX, window.selectCells.endX)
     let startY = Math.min(window.selectCells.startY, window.selectCells.endY)
@@ -470,6 +473,9 @@ function replaceWithSelection() {
     }
 }
 
+/**
+ * Saves the current selected cells to localStorage with the name given in the dialog box
+ */
 function saveSelection() {
     let presets = JSON.parse(localStorage.getItem("customPresets"))
     presets = {...presets, [g_saveName.value]: window.copiedArea}

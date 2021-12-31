@@ -5,7 +5,7 @@ var presets = {
         width: 36,
     },
     Glider_SouthEast: {
-        aliveCells: [1, 5, 6, 7, 8],
+        aliveCells: [2, 3, 5, 7, 8],
         height: 3,
         width: 3,
     },

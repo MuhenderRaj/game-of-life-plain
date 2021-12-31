@@ -7,7 +7,7 @@
     <link rel='stylesheet' type='text/css' media='screen' href='main.css' />
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <script type="module">
-        import {init, saveState, loadState, rotateShape} from './main.js'
+        import {init, saveState, loadState, rotateShape, clearGrid} from './main.js'
         import {presets} from './modules/presets.js'
         let localPresets = JSON.parse(localStorage.getItem("customPresets"))
 
@@ -15,6 +15,7 @@
         window.saveState = saveState
         window.loadState = loadState
         window.rotateShape = rotateShape
+        window.clearGrid = clearGrid
 
         let presetsContainer = document.getElementById("presets")
         let option = document.createElement("option")
@@ -85,12 +86,7 @@
         
         <button onclick="loadState();">Load Grid State</button>
 
-        <!--replaced with C-c and C-v-->
-        <!--
-            <button onclick="copySelection();">Copy Selection</button>
-            <button onclick="replaceWithSelection();">Replace With Selection</button>
-        -->
-        <button onclick="rotateShape();">Rotate Selection</button>
+        <button onclick="clearGrid();">Clear Grid</button>
 
         <select id="presets"></select>
         

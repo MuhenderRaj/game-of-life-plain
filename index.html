@@ -7,8 +7,8 @@
     <link rel='stylesheet' type='text/css' media='screen' href='main.css' />
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <script type="module">
-        import {init, saveState, loadState, rotateShape, clearGrid} from './main.js'
-        import {presets} from './modules/presets.js'
+        import {init, saveState, loadState, rotateShape, clearGrid, savePresets, uploadPresets} from './main.js'
+        import presets from './modules/presets.json' assert {type: "json"}
         let localPresets = JSON.parse(localStorage.getItem("customPresets"))
 
         window.init = init
@@ -16,6 +16,8 @@
         window.loadState = loadState
         window.rotateShape = rotateShape
         window.clearGrid = clearGrid
+        window.savePresets = savePresets
+        window.uploadPresets = uploadPresets
 
         let presetsContainer = document.getElementById("presets")
         let option = document.createElement("option")
@@ -91,6 +93,11 @@
         <select id="presets"></select>
         
         <input type="text" id="save-name" placeholder="Name to Save" />
+        
+        <input type="file" id="presets-file" />
+        <button onclick="uploadPresets()">Upload presets file (presets.json)</button>
+        
+        <button onclick="savePresets();">Save presets as file</button>
     </div>
 
     <canvas id="game" width="1000" height="1000" tabindex='1'>

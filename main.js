@@ -1,4 +1,13 @@
-import { presets } from './modules/presets.js';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import presets from './modules/presets.json' assert { type: "json" };
 const defaultCoordinates = {
     x: NaN,
     y: NaN,
@@ -475,5 +484,35 @@ function rotate(shape) {
 }
 export function rotateShape() {
     window.copiedArea = rotate(window.copiedArea);
+}
+export function savePresets() {
+    let out = JSON.stringify(window.presets);
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(out));
+    element.setAttribute('download', "presets.json");
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+export function uploadPresets() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let fileElement = document.getElementById("presets-file");
+        let presets = JSON.parse(yield fileElement.files[0].text());
+        window.presets = presets;
+        let options = [];
+        let option = document.createElement("option");
+        option.setAttribute("value", "none");
+        option.setAttribute("selected", "selected");
+        option.innerText = "none";
+        options.push(option);
+        for (let preset in presets) {
+            let option = document.createElement("option");
+            option.setAttribute("value", preset);
+            option.innerText = preset;
+            options.push(option);
+        }
+        g_selectPreset.replaceChildren(...options);
+    });
 }
 //# sourceMappingURL=main.js.map

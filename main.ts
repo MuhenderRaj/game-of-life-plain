@@ -1,4 +1,4 @@
-import {presets} from './modules/presets.js';
+import presets from './modules/presets.json' assert {type: "json"}
 
 //////////////////
 /// Interfaces ///
@@ -610,4 +610,43 @@ function rotate(shape: lifeShape): lifeShape {
 
 export function rotateShape() {
     window.copiedArea = rotate(window.copiedArea)
+}
+
+export function savePresets() {
+    let out = JSON.stringify(window.presets)
+    
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(out));
+    element.setAttribute('download', "presets.json");
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+export async function uploadPresets() {
+    let fileElement = document.getElementById("presets-file") as HTMLInputElement
+    let presets = JSON.parse(await fileElement.files[0].text())
+    
+    window.presets = presets
+    
+    let options: HTMLOptionElement[] = []
+
+    let option = document.createElement("option")
+    option.setAttribute("value", "none")
+    option.setAttribute("selected", "selected")
+    option.innerText = "none"
+    options.push(option)
+    
+    for (let preset in presets) {
+        let option = document.createElement("option")
+        option.setAttribute("value", preset)
+        option.innerText = preset
+        options.push(option)
+    }
+    
+    g_selectPreset.replaceChildren(...options)
 }
